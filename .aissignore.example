@@ -1,0 +1,22 @@
+# AISS 扫描忽略文件（简化版 gitignore 语义）
+#
+# 用法：把本文件放到被扫描目标的根目录，AISS 在遍历时会跳过命中项。
+# 典型场景：排除第三方副本、生成代码、样例/测试数据，避免噪声淹没真实风险。
+
+# 依赖副本
+third_party/**
+vendor/**
+site-packages/**
+
+# 构建产物
+dist/
+build/
+*.generated.py
+
+# 测试 fixtures（含故意构造的恶意样本）
+tests/fixtures/**
+examples/**
+
+# 文档里的示例代码
+docs/**/*.sample.*
+*.md.sample

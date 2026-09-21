@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aiss"
+version = "0.4.0"
+description = "AiSecurityScan - 一站式 AI 应用安全检查平台（MCP / Skill / Infra / 红队 / 护栏）"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "AiSecurityScan Contributors" }]
+keywords = ["security", "mcp", "agent", "skill", "supply-chain", "llm", "scanner", "redteam", "jailbreak"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Security",
+    "Environment :: Console",
+]
+
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.2.0",
+    "PyYAML>=6.0",
+    "Jinja2>=3.1.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "mypy>=1.10.0"]
+llm = ["openai>=1.30.0"]
+# python-multipart：控制台「上传规则包」走 multipart/form-data，缺了会 500
+server = ["fastapi>=0.110.0", "uvicorn>=0.29.0", "python-multipart>=0.0.9"]
+
+[project.scripts]
+aiss = "aiss.cli:app"
+aiscan = "aiss.cli:app"
+
+[tool.setuptools]
+packages = [
+    "aiss",
+    "aiss.core",
+    "aiss.engines",
+    "aiss.evals",
+    "aiss.rules",
+    "aiss.reporters",
+    "aiss.utils",
+    "aiss.modules",
+    "aiss.modules.mcp",
+    "aiss.modules.skill",
+    "aiss.modules.infra",
+    "aiss.modules.agent_redteam",
+    "aiss.modules.model_guard",
+    "aiss.server",
+]
+
+# 只打包自研规则与报告模板。
+# 注意：**不要** 把 rules/external/ 打进来 —— 那里是通过 `aiss rules sync` 拉取的第三方
+# 规则（9MB+，版权归上游），随发行版分发既臃肿又有合规风险。
+[tool.setuptools.package-data]
+"aiss" = ["rules/custom/*.yml", "rules/custom/*.yaml", "reporters/templates/*.html",
+          "web/*.html", "web/*.css", "web/*.js", "web/*.png"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

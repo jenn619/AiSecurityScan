@@ -1,0 +1,32 @@
+# 提交前自检：改动技能/MCP 配置时拦一道。
+#
+# 安装：
+#   pip install pre-commit && pre-commit install
+#
+# 只对本次变更涉及的部分跑扫描，速度快；全量门禁仍由 CI 承担。
+repos:
+  - repo: local
+    hooks:
+      - id: aiss-skill
+        name: AISS · Agent 技能供应链审计
+        entry: aiss scan skill -p . --fail-on critical
+        language: system
+        always_run: true
+        pass_filenames: false
+        files: ^(SKILL\.md|scripts/|requirements\.txt)$
+
+      - id: aiss-mcp
+        name: AISS · MCP 配置与插件审计
+        entry: aiss scan mcp -p . --fail-on critical
+        language: system
+        always_run: true
+        pass_filenames: false
+        files: ^(.*mcp.*\.(json|ya?ml)|server\.(py|ts|js))$
+
+      - id: aiss-secrets
+        name: AISS · 凭证泄漏快查（含 AST 语义分析）
+        entry: aiss scan skill -p . --fail-on high -f json -o /tmp/aiss-precommit.json
+        language: system
+        always_run: true
+        pass_filenames: false
+        stages: [pre-push]

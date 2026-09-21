@@ -1,0 +1,19 @@
+AiSecurityScan (aiss)
+Copyright 2026 AiSecurityScan Contributors
+
+本产品包含从以下项目同步或参考的内容：
+
+1. 外部同步规则包
+   - 来源：见配置项 `rules.external_repo`（仓库地址可在配置里自行指定）
+   - 用途：通过 `aiss rules sync` 将 data/fingerprints、data/vuln、data/mcp 下的
+     YAML 规则同步到 aiss/rules/external/，用于 AI 基础设施与 MCP 风险检测。
+   - 版权归各自原作者所有，遵循其原始许可证；本产品仅做镜像同步，不修改规则内容。
+   - 同步版本记录在 aiss/rules/external/VERSION.txt。
+
+2. 风险分类参考
+   - SkillTrustBench T01-T09（Agent 技能供应链风险分类）
+   - OWASP MCP Top 10 / OWASP Top 10 for LLM Applications
+   - NVIDIA/SkillSpector、snyk/agent-scan、Ramparts、aguara、mcp-armor 的检测思路
+   - awesome-ai-security-tools（工具清单）
+
+检测规则的具体实现（aiss/rules/custom/*.yml）由本项目编写，采用 MIT 许可证。

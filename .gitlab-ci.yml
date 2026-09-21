@@ -1,0 +1,63 @@
+# GitLab CI：五域安全检查 + 增量门禁
+# 需要在 Settings → CI/CD → Variables 里配置：
+#   AISS_FAIL_ON_NEW  high          # 增量门禁阈值
+stages:
+  - test
+  - scan
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  AISS_FAIL_ON_NEW: "high"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .cache/pip
+
+# 先保证扫描器自身是对的，再去扫别人
+aiss-quality:
+  stage: test
+  image: python:3.11-slim
+  before_script:
+    - pip install -e ".[dev,server]"
+  script:
+    - pytest -q
+    - mypy aiss --ignore-missing-imports
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+aiss-scan:
+  stage: scan
+  image: python:3.11-slim
+  before_script:
+    - pip install -e ".[server]"
+    - aiss rules sync --version main || echo "规则同步失败，使用本地规则包"
+  script:
+    # 全量报告（留存 / 下载）
+    - aiss scan --type infra,mcp,skill --path . --format all --output aiss-report || true
+    # 增量门禁：与基线比对，只对新增的高危及以上风险失败
+    - |
+      if [ -f .aiss-baseline.json ]; then
+        aiss diff .aiss-baseline.json \
+             --path . --type infra,mcp,skill \
+             --fail-on-new "$AISS_FAIL_ON_NEW" \
+             --markdown aiss-diff.md
+      else
+        echo "未找到基线，退化为全量门禁"
+        aiss scan --type infra,mcp,skill --path . --fail-on high
+      fi
+  artifacts:
+    when: always
+    paths:
+      - aiss-report.html
+      - aiss-report.json
+      - aiss-report.sarif
+      - aiss-diff.md
+    reports:
+      # GitLab Ultimate 可直接渲染 SARIF 到 MR 界面
+      sast: aiss-report.sarif
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

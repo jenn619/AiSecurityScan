@@ -1,0 +1,34 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# --- 工具缓存 ---
+.mypy_cache/
+.mypy_cache2/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- 本机私有配置 / 运行时产物 ---
+.aissrc
+*.local.yml
+.aiss/*.json
+aiss/rules/.external_cache.json
+sbom.json
+reports/
+!examples/reports/
+
+# --- 编辑器 / 系统 ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# --- Agent 工作区 ---
+.workbuddy/
